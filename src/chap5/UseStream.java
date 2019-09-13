@@ -182,5 +182,6 @@ public class UseStream {
         Stream.generate(Math::random)
                 .limit(5)
                 .forEach(System.out::println);
+
     }
 }
