@@ -4,11 +4,13 @@ import chap4.CaloriesLevel;
 import chap4.Dish;
 import chap5.Trader;
 import chap5.Transaction;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.*;
@@ -104,6 +106,44 @@ public class UseCollectors {
                 .collect(groupingBy(Dish::getType, mapping(classifyDishesByCaloriesLevel(), toSet())));
     }
 
+    public static Map<Boolean, List<Dish>> getVegetarianDishes(List<Dish> menu) {
+        return menu.stream()
+                .collect(partitioningBy(Dish::isVegetarian));
+    }
+
+    public static Map<Boolean, Map<Dish.Type, List<Dish>>> getVegetarianDishByType(List<Dish> menu) {
+        return menu.stream()
+                .collect(
+                    partitioningBy(
+                        Dish::isVegetarian,
+                        groupingBy(Dish::getType)
+                    )
+                );
+    }
+
+    public static Map<Boolean, Dish> getMostCaloriesByVegetarian(List<Dish> menu) {
+        return menu.stream()
+                .collect(partitioningBy(
+                    Dish::isVegetarian,
+                    collectingAndThen(
+                        maxBy(comparingInt(Dish::getCalories)),
+                        Optional::get)
+                    )
+                );
+    }
+
+    public static boolean isPrime(int num) {
+        int root = (int) Math.sqrt(num);
+        return IntStream.rangeClosed(2, root)
+                .noneMatch(i -> num / i == 0);
+    }
+
+    public static Map<Boolean, List<Integer>> getPartitionPrimes(int n) {
+        return IntStream.rangeClosed(2, n)
+                .boxed()
+                .collect(partitioningBy(UseCollectors::isPrime));
+    }
+
     public static void main(String[] args) {
         Trader raoul = new Trader("Raoul", "Cambridge");
         Trader mario = new Trader("Mario","Milan");
@@ -150,5 +190,17 @@ public class UseCollectors {
 
         Map<Dish.Type, Set<CaloriesLevel>> dishesTypeCaloriesLevel = getCaloriesLevelByType(menu);
         System.out.println(dishesTypeCaloriesLevel);
+
+        Map<Boolean, List<Dish>> vegetarianDishes = getVegetarianDishes(menu);
+        System.out.println(vegetarianDishes);
+
+        Map<Boolean, Map<Dish.Type, List<Dish>>> vegetarianDishByType = getVegetarianDishByType(menu);
+        System.out.println(vegetarianDishByType);
+
+        Map<Boolean, Dish> mostCaloriesByVegetarian = getMostCaloriesByVegetarian(menu);
+        System.out.println(mostCaloriesByVegetarian);
+
+        Map<Boolean, List<Integer>> partitionPrime = getPartitionPrimes(50);
+        System.out.println(partitionPrime);
     }
 }
