@@ -135,13 +135,19 @@ public class UseCollectors {
     public static boolean isPrime(int num) {
         int root = (int) Math.sqrt(num);
         return IntStream.rangeClosed(2, root)
-                .noneMatch(i -> num / i == 0);
+                .noneMatch(i -> num % i == 0);
     }
 
     public static Map<Boolean, List<Integer>> getPartitionPrimes(int n) {
         return IntStream.rangeClosed(2, n)
                 .boxed()
                 .collect(partitioningBy(UseCollectors::isPrime));
+    }
+
+    public static Map<Boolean, List<Integer>> partitionPrimesWithCustomCollector(int n) {
+        return IntStream.rangeClosed(2, n)
+                .boxed()
+                .collect(new PrimeNumbersCollector());
     }
 
     public static void main(String[] args) {
@@ -202,5 +208,8 @@ public class UseCollectors {
 
         Map<Boolean, List<Integer>> partitionPrime = getPartitionPrimes(50);
         System.out.println(partitionPrime);
+
+        Map<Boolean, List<Integer>> partitionPrimes = partitionPrimesWithCustomCollector(50);
+        System.out.println(partitionPrimes);
     }
 }
