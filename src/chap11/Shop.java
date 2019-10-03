@@ -45,7 +45,7 @@ public class Shop {
     }
 
     private double calculatePrice(String product) {
-        delay();
+        randomDelay();
         return new Random().nextDouble() * product.charAt(0) + product.charAt(1);
     }
 
@@ -54,6 +54,17 @@ public class Shop {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
             throw new RuntimeException();
+        }
+    }
+
+    private static final Random random = new Random();
+
+    public static void randomDelay() {
+        int delay = 500 + random.nextInt(2000);
+        try {
+            Thread.sleep(delay);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 }

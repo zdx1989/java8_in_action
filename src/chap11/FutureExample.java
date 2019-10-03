@@ -3,6 +3,7 @@ package chap11;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
@@ -67,6 +68,14 @@ public class FutureExample {
         System.out.println(findPrice2(shops, "HuaWei Mate30"));
         long duration4 = (System.nanoTime() - start4) / 1_000_000;
         System.out.println("Done in " + duration4 + " msecs");
+
+        long start5 = System.nanoTime();
+        CompletableFuture[] futures =  findPricesStream(shops, "HuaWei Mate30")
+                .map(future -> future.thenAccept(System.out::println))
+                .toArray(CompletableFuture[]::new);
+        CompletableFuture.allOf(futures).join();
+        long duration5 = (System.nanoTime() - start5) / 1_000_000;
+        System.out.println("Done in " + duration5 + " msecs");
 
     }
     public static Double doSomeLongComputation() throws InterruptedException {
@@ -151,6 +160,23 @@ public class FutureExample {
 //    public static List<Double> findPrice3(List<Shop> shops, String product) {
 //        Future<Double> futurePrices = executor
 //    }
+
+    public static Stream<CompletableFuture<String>> findPricesStream(List<Shop> shops, String product) {
+        return shops.stream()
+                .map(shop -> CompletableFuture.supplyAsync(
+                        () -> shop.getPrice1(product),
+                        generateExecutor(shops.size())
+                    )
+                )
+                .map(future -> future.thenApply(Quote::parse))
+                .map(future -> future.thenCompose(quote ->
+                    CompletableFuture.supplyAsync(
+                        () -> Discount.applyDiscount(quote),
+                        generateExecutor(shops.size())
+                    )
+                ));
+    }
+
 
     private static double getRate() {
         delay();
