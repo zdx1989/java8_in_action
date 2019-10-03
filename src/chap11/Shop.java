@@ -38,6 +38,12 @@ public class Shop {
         return calculatePrice(product);
     }
 
+    public String getPrice1(String product) {
+        double price = calculatePrice(product);
+        Discount.Code code = Discount.Code.values()[new Random().nextInt(Discount.Code.values().length)];
+        return String.format("%s:%.2f:%s", name, price, code);
+    }
+
     private double calculatePrice(String product) {
         delay();
         return new Random().nextDouble() * product.charAt(0) + product.charAt(1);
